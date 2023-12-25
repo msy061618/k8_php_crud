@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-apache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php-apache
+  template:
+    metadata:
+      labels:
+        app: php-apache
+    spec:
+      containers:
+      - name: php-apache
+        image: msy061618/php_apache:v1
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: apache-persistent-storage
+          mountPath: /var/www/html      
+      volumes:
+      - name: apache-persistent-storage
+        persistentVolumeClaim:
+          claimName: apache-nfs-pvc          
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-apache-service
+spec:
+  selector:
+    app: php-apache
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
